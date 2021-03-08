@@ -22,7 +22,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, TimeSpan> DurationProperty =
             AvaloniaProperty.RegisterDirect<Animation, TimeSpan>(
-                nameof(Duration),
+                nameof(_duration),
                 o => o._duration,
                 (o, v) => o._duration = v);
 
@@ -31,7 +31,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, IterationCount> IterationCountProperty =
             AvaloniaProperty.RegisterDirect<Animation, IterationCount>(
-                nameof(IterationCount),
+                nameof(_iterationCount),
                 o => o._iterationCount,
                 (o, v) => o._iterationCount = v);
 
@@ -40,7 +40,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, PlaybackDirection> PlaybackDirectionProperty =
             AvaloniaProperty.RegisterDirect<Animation, PlaybackDirection>(
-                nameof(PlaybackDirection),
+                nameof(_playbackDirection),
                 o => o._playbackDirection,
                 (o, v) => o._playbackDirection = v);
 
@@ -49,7 +49,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, FillMode> FillModeProperty =
             AvaloniaProperty.RegisterDirect<Animation, FillMode>(
-                nameof(FillMode),
+                nameof(_fillMode),
                 o => o._fillMode,
                 (o, v) => o._fillMode = v);
 
@@ -58,7 +58,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, Easing> EasingProperty =
             AvaloniaProperty.RegisterDirect<Animation, Easing>(
-                nameof(Easing),
+                nameof(_easing),
                 o => o._easing,
                 (o, v) => o._easing = v);
 
@@ -67,7 +67,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, TimeSpan> DelayProperty =
             AvaloniaProperty.RegisterDirect<Animation, TimeSpan>(
-                nameof(Delay),
+                nameof(_delay),
                 o => o._delay,
                 (o, v) => o._delay = v);
 
@@ -76,7 +76,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, TimeSpan> DelayBetweenIterationsProperty =
             AvaloniaProperty.RegisterDirect<Animation, TimeSpan>(
-                nameof(DelayBetweenIterations),
+                nameof(_delayBetweenIterations),
                 o => o._delayBetweenIterations,
                 (o, v) => o._delayBetweenIterations = v);
 
@@ -85,7 +85,7 @@ namespace Avalonia.Animation
         /// </summary>
         public static readonly DirectProperty<Animation, double> SpeedRatioProperty =
             AvaloniaProperty.RegisterDirect<Animation, double>(
-                nameof(SpeedRatio),
+                nameof(_speedRatio),
                 o => o._speedRatio,
                 (o, v) => o._speedRatio = v,
                 defaultBindingMode: BindingMode.TwoWay);
