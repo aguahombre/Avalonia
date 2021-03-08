@@ -525,18 +525,13 @@ namespace Avalonia.Controls
             PlatformImpl?.Dispose();
         }
 
-        private bool ShouldCancelClose(CancelEventArgs args = null)
+        private bool ShouldCancelClose()
         {
-            if (args is null)
-            {
-                args = new CancelEventArgs();
-            }
-            
             bool canClose = true;
 
             foreach (var (child, _) in _children.ToList())
             {
-                if (child.ShouldCancelClose(args))
+                if (child.ShouldCancelClose())
                 {
                     canClose = false;
                 }
@@ -544,6 +539,7 @@ namespace Avalonia.Controls
 
             if (canClose)
             {
+                var args = new CancelEventArgs();
                 OnClosing(args);
 
                 return args.Cancel;
