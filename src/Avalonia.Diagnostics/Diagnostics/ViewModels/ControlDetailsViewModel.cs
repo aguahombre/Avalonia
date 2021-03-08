@@ -21,8 +21,6 @@ namespace Avalonia.Diagnostics.ViewModels
         private AvaloniaPropertyViewModel _selectedProperty;
         private string _styleFilter;
         private bool _snapshotStyles;
-        private bool _showInactiveStyles;
-        private string _styleStatus;
 
         public ControlDetailsViewModel(TreePageViewModel treePage, IVisual control)
         {
@@ -154,18 +152,6 @@ namespace Avalonia.Diagnostics.ViewModels
         {
             get => _snapshotStyles;
             set => RaiseAndSetIfChanged(ref _snapshotStyles, value);
-        }
-
-        public bool ShowInactiveStyles
-        {
-            get => _showInactiveStyles;
-            set => RaiseAndSetIfChanged(ref _showInactiveStyles, value);
-        }
-
-        public string StyleStatus
-        {
-            get => _styleStatus;
-            set => RaiseAndSetIfChanged(ref _styleStatus, value);
         }
 
         public ControlLayoutViewModel Layout { get; }
@@ -302,16 +288,9 @@ namespace Avalonia.Diagnostics.ViewModels
 
         private void UpdateStyles()
         {
-            int activeCount = 0;
-
             foreach (var style in AppliedStyles)
             {
                 style.Update();
-
-                if (style.IsActive)
-                {
-                    activeCount++;
-                }
             }
 
             var propertyBuckets = new Dictionary<AvaloniaProperty, List<SetterViewModel>>();
@@ -351,8 +330,6 @@ namespace Avalonia.Diagnostics.ViewModels
             {
                 pseudoClass.Update();
             }
-
-            StyleStatus = $"Styles ({activeCount}/{AppliedStyles.Count} active)";
         }
 
         private bool FilterProperty(object arg)
