@@ -482,9 +482,10 @@ namespace Avalonia.Controls
 
             try
             {
-                if (!ignoreCancel && ShouldCancelClose())
+                if (!ignoreCancel && HandleClosing())
                 {
                     close = false;
+                    return;
                 }
             }
             finally
@@ -496,25 +497,11 @@ namespace Avalonia.Controls
             }
         }
 
-        /// <summary>
-        /// Handles a closing notification from <see cref="IWindowImpl.Closing"/>.
-        /// <returns>true if closing is cancelled. Otherwise false.</returns>
-        /// </summary>
-        protected virtual bool HandleClosing()
-        {
-            if (ShouldCancelClose())
-            {
-                CloseInternal();
-                return true;
-            }
-            
-            return false;
-        }
-
         private void CloseInternal()
         {
             foreach (var (child, _) in _children.ToList())
             {
+                // if we HandleClosing() before then there will be no children.
                 child.CloseInternal();
             }
 
@@ -528,13 +515,20 @@ namespace Avalonia.Controls
             PlatformImpl?.Dispose();
         }
 
-        private bool ShouldCancelClose()
+        /// <summary>
+        /// Handles a closing notification from <see cref="IWindowImpl.Closing"/>.
+        /// </summary>
+        protected virtual bool HandleClosing()
         {
             bool canClose = true;
-            
+
             foreach (var (child, _) in _children.ToList())
             {
-                if (child.ShouldCancelClose())
+                if (!child.HandleClosing())
+                {
+                    child.CloseInternal();
+                }
+                else
                 {
                     canClose = false;
                 }
@@ -547,8 +541,10 @@ namespace Avalonia.Controls
 
                 return args.Cancel;
             }
-
-            return true;
+            else
+            {
+                return !canClose;
+            }
         }
 
         protected virtual void HandleWindowStateChanged(WindowState state)
