@@ -154,6 +154,7 @@ namespace Avalonia.Controls.UnitTests
             {
                 var target = new ComboBox
                 {
+                    IsTextSearchEnabled = true,
                     Template = GetTemplate(),                    
                     Items = items.Select(x => new ComboBoxItem { Content = x })
                 };
