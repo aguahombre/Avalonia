@@ -59,7 +59,7 @@
                   Grid.Column="4"/>
             <Popup Name="PART_Popup"
                    PlacementMode="Right"
-                   IsLightDismissEnabled="False"
+                   IsLightDismissEnabled="True"
                    OverlayInputPassThroughElement="{Binding $parent[MenuItem]}"
                    IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}">
               <Border Background="{TemplateBinding Background}"
