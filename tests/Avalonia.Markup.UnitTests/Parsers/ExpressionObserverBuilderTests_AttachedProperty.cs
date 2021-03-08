@@ -117,11 +117,9 @@ namespace Avalonia.Markup.UnitTests.Parsers
             var result = run();
             result.Item1.Subscribe(x => { });
 
-            // Mono trickery
-            GC.Collect(2);
+            GC.Collect();
             GC.WaitForPendingFinalizers();
-            GC.WaitForPendingFinalizers();
-            GC.Collect(2);
+            GC.Collect();
 
             Assert.Null(result.Item2.Target);
         }
