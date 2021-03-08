@@ -38,7 +38,5 @@ namespace Avalonia
     public class MacOSPlatformOptions
     {
         public bool ShowInDock { get; set; } = true;
-        
-        public bool DisableDefaultApplicationMenuItems { get; set; }
     }
 }
