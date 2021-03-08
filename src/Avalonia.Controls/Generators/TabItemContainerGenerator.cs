@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Templates;
-using Avalonia.LogicalTree;
-using Avalonia.Reactive;
-using Avalonia.VisualTree;
 
 namespace Avalonia.Controls.Generators
 {    
@@ -22,15 +16,11 @@ namespace Avalonia.Controls.Generators
         {
             var tabItem = (TabItem)base.CreateContainer(item);
 
-            tabItem.Bind(TabItem.TabStripPlacementProperty, new OwnerBinding<Dock>(
-                tabItem,
-                TabControl.TabStripPlacementProperty));
+            tabItem[~TabControl.TabStripPlacementProperty] = Owner[~TabControl.TabStripPlacementProperty];
 
             if (tabItem.HeaderTemplate == null)
             {
-                tabItem.Bind(TabItem.HeaderTemplateProperty, new OwnerBinding<IDataTemplate>(
-                    tabItem,
-                    TabControl.ItemTemplateProperty));
+                tabItem[~HeaderedContentControl.HeaderTemplateProperty] = Owner[~ItemsControl.ItemTemplateProperty];
             }
 
             if (tabItem.Header == null)
@@ -50,49 +40,10 @@ namespace Avalonia.Controls.Generators
 
             if (!(tabItem.Content is IControl))
             {
-                tabItem.Bind(TabItem.ContentTemplateProperty, new OwnerBinding<IDataTemplate>(
-                    tabItem,
-                    TabControl.ContentTemplateProperty));
+                tabItem[~ContentControl.ContentTemplateProperty] = Owner[~TabControl.ContentTemplateProperty];
             }
 
             return tabItem;
-        }
-
-        private class OwnerBinding<T> : SingleSubscriberObservableBase<T>
-        {
-            private readonly TabItem _item;
-            private readonly StyledProperty<T> _ownerProperty;
-            private IDisposable _ownerSubscription;
-            private IDisposable _propertySubscription;
-
-            public OwnerBinding(TabItem item, StyledProperty<T> ownerProperty)
-            {
-                _item = item;
-                _ownerProperty = ownerProperty;
-            }
-
-            protected override void Subscribed()
-            {
-                _ownerSubscription = ControlLocator.Track(_item, 0, typeof(TabControl)).Subscribe(OwnerChanged);
-            }
-
-            protected override void Unsubscribed()
-            {
-                _ownerSubscription?.Dispose();
-                _ownerSubscription = null;
-            }
-
-            private void OwnerChanged(ILogical c)
-            {
-                _propertySubscription?.Dispose();
-                _propertySubscription = null;
-
-                if (c is TabControl tabControl)
-                {
-                    _propertySubscription = tabControl.GetObservable(_ownerProperty)
-                        .Subscribe(x => PublishNext(x));
-                }
-            }
         }
     }
 }

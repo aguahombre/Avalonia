@@ -374,7 +374,6 @@ namespace Avalonia.Controls.UnitTests
                     new TextBlock { Tag = "bar", Text = x }),
                 Items = new[] { "Foo" },
             };
-            var root = new TestRoot(target);
 
             ApplyTemplate(target);
             ((ContentPresenter)target.ContentPart).UpdateChild();
