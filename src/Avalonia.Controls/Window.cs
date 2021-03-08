@@ -502,10 +502,10 @@ namespace Avalonia.Controls
             if (!ShouldCancelClose())
             {
                 CloseInternal();
-                return false;
+                return true;
             }
             
-            return true;
+            return false;
         }
 
         private void CloseInternal()
