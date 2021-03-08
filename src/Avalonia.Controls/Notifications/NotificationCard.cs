@@ -16,11 +16,6 @@ namespace Avalonia.Controls.Notifications
         private bool _isClosed;
         private bool _isClosing;
 
-        static NotificationCard()
-        {
-            CloseOnClickProperty.Changed.AddClassHandler<Button>(OnCloseOnClickPropertyChanged);
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationCard"/> class.
         /// </summary>
@@ -110,26 +105,22 @@ namespace Avalonia.Controls.Notifications
 
         public static bool GetCloseOnClick(Button obj)
         {
-            Contract.Requires<ArgumentNullException>(obj != null);
             return (bool)obj.GetValue(CloseOnClickProperty);
         }
 
         public static void SetCloseOnClick(Button obj, bool value)
         {
-            Contract.Requires<ArgumentNullException>(obj != null);
             obj.SetValue(CloseOnClickProperty, value);
         }
 
         /// <summary>
         /// Defines the CloseOnClick property.
         /// </summary>
-        public static readonly AttachedProperty<bool> CloseOnClickProperty =
-          AvaloniaProperty.RegisterAttached<NotificationCard, Button, bool>("CloseOnClick", defaultValue: false);
+        public static readonly AvaloniaProperty CloseOnClickProperty =
+          AvaloniaProperty.RegisterAttached<Button, bool>("CloseOnClick", typeof(NotificationCard)/*, validate: CloseOnClickChanged*/);
 
-        private static void OnCloseOnClickPropertyChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
+        private static bool CloseOnClickChanged(Button button, bool value)
         {
-            var button = (Button)d;
-            var value = (bool)e.NewValue;
             if (value)
             {
                 button.Click += Button_Click;
@@ -138,6 +129,8 @@ namespace Avalonia.Controls.Notifications
             {
                 button.Click -= Button_Click;
             }
+
+            return true;
         }
 
         /// <summary>
