@@ -78,13 +78,13 @@ namespace Avalonia.Controls
             ContentControl.VerticalContentAlignmentProperty.AddOwner<ComboBox>();
 
         /// <summary>
-        /// Defines the <see cref="IsTextSearchEnabled"/> property.
+        /// Defines the <see cref="IsAutoSelectEnabled"/> property.
         /// </summary>
-        public static readonly StyledProperty<bool> IsTextSearchEnabledProperty =
-            AvaloniaProperty.Register<ComboBox, bool>(nameof(IsTextSearchEnabled));
+        public static readonly StyledProperty<bool> IsAutoSelectEnabledProperty =
+            AvaloniaProperty.Register<ComboBox, bool>(nameof(IsAutoSelectEnabled));
 
-        private string _textSearchTerm = string.Empty;
-        private DispatcherTimer _textSearchTimer;
+        private string _autoSelectTerm = string.Empty;
+        private DispatcherTimer _autoSelectTimer;
         private bool _isDropDownOpen;
         private Popup _popup;
         private object _selectionBoxItem;
@@ -174,12 +174,14 @@ namespace Avalonia.Controls
         }
 
         /// <summary>
-        /// Gets or sets a value that specifies whether a user can jump to a value by typing.
+        /// Gets or sets value indicating whether auto-select is currently enabled.
+        /// If <c>true</c>, the control will try to find then select matched <see cref="ComboBoxItem"/>
+        /// based on current keyboard inputs.
         /// </summary>
-        public bool IsTextSearchEnabled
+        public bool IsAutoSelectEnabled
         {
-            get { return GetValue(IsTextSearchEnabledProperty); }
-            set { SetValue(IsTextSearchEnabledProperty, value); }
+            get { return GetValue(IsAutoSelectEnabledProperty); }
+            set { SetValue(IsAutoSelectEnabledProperty, value); }
         }
 
         /// <inheritdoc/>
@@ -250,16 +252,16 @@ namespace Avalonia.Controls
         /// <inheritdoc />
         protected override void OnTextInput(TextInputEventArgs e)
         {
-            if (!IsTextSearchEnabled || e.Handled)
+            if (!IsAutoSelectEnabled || e.Handled)
                 return;
 
-            StopTextSearchTimer();
+            StopAutoSelectTimer();
 
-            _textSearchTerm += e.Text;
+            _autoSelectTerm += e.Text;
 
             bool match(ItemContainerInfo info) => 
                 info.ContainerControl is IContentControl control &&
-                control.Content?.ToString()?.StartsWith(_textSearchTerm, StringComparison.OrdinalIgnoreCase) == true;
+                control.Content?.ToString()?.StartsWith(_autoSelectTerm, StringComparison.OrdinalIgnoreCase) == true;
 
             var info = ItemContainerGenerator.Containers.FirstOrDefault(match);
 
@@ -268,7 +270,7 @@ namespace Avalonia.Controls
                 SelectedIndex = info.Index;
             }
 
-            StartTextSearchTimer();
+            StartAutoSelectTimer();
 
             e.Handled = true;
         }
@@ -471,30 +473,30 @@ namespace Avalonia.Controls
             SelectedIndex = prev;
         }
 
-        private void StartTextSearchTimer()
+        private void StartAutoSelectTimer()
         {
-            _textSearchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            _textSearchTimer.Tick += TextSearchTimer_Tick;
-            _textSearchTimer.Start();
+            _autoSelectTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _autoSelectTimer.Tick += AutoSelectTimer_Tick;
+            _autoSelectTimer.Start();
         }
 
-        private void StopTextSearchTimer()
+        private void StopAutoSelectTimer()
         {
-            if (_textSearchTimer == null)
+            if (_autoSelectTimer == null)
             {
                 return;
             }
 
-            _textSearchTimer.Stop();
-            _textSearchTimer.Tick -= TextSearchTimer_Tick;
+            _autoSelectTimer.Stop();
+            _autoSelectTimer.Tick -= AutoSelectTimer_Tick;
 
-            _textSearchTimer = null;
+            _autoSelectTimer = null;
         }
 
-        private void TextSearchTimer_Tick(object sender, EventArgs e)
+        private void AutoSelectTimer_Tick(object sender, EventArgs e)
         {
-            _textSearchTerm = string.Empty;
-            StopTextSearchTimer();
+            _autoSelectTerm = string.Empty;
+            StopAutoSelectTimer();
         }
     }
 }
