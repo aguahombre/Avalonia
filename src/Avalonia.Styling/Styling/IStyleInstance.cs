@@ -14,8 +14,6 @@ namespace Avalonia.Styling
         /// </summary>
         IStyle Source { get; }
 
-        bool IsActive { get; }
-
         /// <summary>
         /// Instructs the style to start acting upon the control.
         /// </summary>
