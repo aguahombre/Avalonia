@@ -31,18 +31,11 @@ namespace Avalonia.Diagnostics.ViewModels
             get => _selectedNode;
             private set
             {
-                var oldDetails = Details;
-
                 if (RaiseAndSetIfChanged(ref _selectedNode, value))
                 {
                     Details = value != null ?
                         new ControlDetailsViewModel(this, value.Visual) :
                         null;
-
-                    if (Details != null && oldDetails != null)
-                    {
-                        Details.StyleFilter = oldDetails.StyleFilter;
-                    }
                 }
             }
         }
