@@ -20,7 +20,6 @@ namespace Avalonia.Diagnostics.ViewModels
         private readonly IDictionary<object, List<PropertyViewModel>> _propertyIndex;
         private AvaloniaPropertyViewModel _selectedProperty;
         private string _styleFilter;
-        private bool _snapshotStyles;
 
         public ControlDetailsViewModel(TreePageViewModel treePage, IVisual control)
         {
@@ -54,7 +53,7 @@ namespace Avalonia.Diagnostics.ViewModels
             }
 
             AppliedStyles = new ObservableCollection<StyleViewModel>();
-            PseudoClasses = new ObservableCollection<PseudoClassViewModel>();
+            PseudoClasses = new ObservableCollection<PseudoClassesViewModel>();
 
             if (control is StyledElement styledElement)
             {
@@ -66,7 +65,7 @@ namespace Avalonia.Diagnostics.ViewModels
                 {
                     foreach (var className in classAttribute.PseudoClasses)
                     {
-                        PseudoClasses.Add(new PseudoClassViewModel(className, styledElement));
+                        PseudoClasses.Add(new PseudoClassesViewModel(className, styledElement));
                     }
                 }
 
@@ -134,7 +133,7 @@ namespace Avalonia.Diagnostics.ViewModels
 
         public ObservableCollection<StyleViewModel> AppliedStyles { get; }
 
-        public ObservableCollection<PseudoClassViewModel> PseudoClasses { get; }
+        public ObservableCollection<PseudoClassesViewModel> PseudoClasses { get; }
 
         public AvaloniaPropertyViewModel SelectedProperty
         {
@@ -147,13 +146,7 @@ namespace Avalonia.Diagnostics.ViewModels
             get => _styleFilter;
             set => RaiseAndSetIfChanged(ref _styleFilter, value);
         }
-
-        public bool SnapshotStyles
-        {
-            get => _snapshotStyles;
-            set => RaiseAndSetIfChanged(ref _snapshotStyles, value);
-        }
-
+        
         public ControlLayoutViewModel Layout { get; }
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -163,13 +156,6 @@ namespace Avalonia.Diagnostics.ViewModels
             if (e.PropertyName == nameof(StyleFilter))
             {
                 UpdateStyleFilters();
-            }
-            else if (e.PropertyName == nameof(SnapshotStyles))
-            {
-                if (!SnapshotStyles)
-                {
-                    UpdateStyles();
-                }
             }
         }
 
@@ -272,18 +258,12 @@ namespace Avalonia.Diagnostics.ViewModels
                 }
             }
 
-            if (!SnapshotStyles)
-            {
-                UpdateStyles();
-            }
+            UpdateStyles();
         }
 
         private void OnClassesChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!SnapshotStyles)
-            {
-                UpdateStyles();
-            }
+            UpdateStyles();
         }
 
         private void UpdateStyles()

@@ -163,14 +163,6 @@ namespace Avalonia.Diagnostics.ViewModels
             tree?.SelectControl(control);
         }
 
-        public void EnableSnapshotStyles(bool enable)
-        {
-            if (Content is TreePageViewModel treeVm && treeVm.Details != null)
-            {
-                treeVm.Details.SnapshotStyles = enable;
-            }
-        }
-
         public void Dispose()
         {
             KeyboardDevice.Instance.PropertyChanged -= KeyboardPropertyChanged;

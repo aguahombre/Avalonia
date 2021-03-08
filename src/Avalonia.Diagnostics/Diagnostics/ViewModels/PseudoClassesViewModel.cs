@@ -2,14 +2,14 @@
 
 namespace Avalonia.Diagnostics.ViewModels
 {
-    internal class PseudoClassViewModel : ViewModelBase
+    internal class PseudoClassesViewModel : ViewModelBase
     {
         private readonly IPseudoClasses _pseudoClasses;
         private readonly StyledElement _source;
         private bool _isActive;
         private bool _isUpdating;
 
-        public PseudoClassViewModel(string name, StyledElement source)
+        public PseudoClassesViewModel(string name, StyledElement source)
         {
             Name = name;
             _source = source;
