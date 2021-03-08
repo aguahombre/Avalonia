@@ -22,7 +22,6 @@ namespace Avalonia.Controls
                 o => o.CellTemplate,
                 (o, v) => o.CellTemplate = v);
 
-        [Content]
         public IDataTemplate CellTemplate
         {
             get { return _cellTemplate; }
