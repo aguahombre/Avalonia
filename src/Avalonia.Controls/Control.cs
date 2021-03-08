@@ -8,8 +8,6 @@ using Avalonia.Rendering;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
 
-#nullable enable
-
 namespace Avalonia.Controls
 {
     /// <summary>
@@ -25,20 +23,20 @@ namespace Avalonia.Controls
         /// <summary>
         /// Defines the <see cref="FocusAdorner"/> property.
         /// </summary>
-        public static readonly StyledProperty<ITemplate<IControl>?> FocusAdornerProperty =
-            AvaloniaProperty.Register<Control, ITemplate<IControl>?>(nameof(FocusAdorner));
+        public static readonly StyledProperty<ITemplate<IControl>> FocusAdornerProperty =
+            AvaloniaProperty.Register<Control, ITemplate<IControl>>(nameof(FocusAdorner));
 
         /// <summary>
         /// Defines the <see cref="Tag"/> property.
         /// </summary>
-        public static readonly StyledProperty<object?> TagProperty =
-            AvaloniaProperty.Register<Control, object?>(nameof(Tag));
+        public static readonly StyledProperty<object> TagProperty =
+            AvaloniaProperty.Register<Control, object>(nameof(Tag));
         
         /// <summary>
         /// Defines the <see cref="ContextMenu"/> property.
         /// </summary>
-        public static readonly StyledProperty<ContextMenu?> ContextMenuProperty =
-            AvaloniaProperty.Register<Control, ContextMenu?>(nameof(ContextMenu));
+        public static readonly StyledProperty<ContextMenu> ContextMenuProperty =
+            AvaloniaProperty.Register<Control, ContextMenu>(nameof(ContextMenu));
 
         /// <summary>
         /// Event raised when an element wishes to be scrolled into view.
@@ -46,16 +44,16 @@ namespace Avalonia.Controls
         public static readonly RoutedEvent<RequestBringIntoViewEventArgs> RequestBringIntoViewEvent =
             RoutedEvent.Register<Control, RequestBringIntoViewEventArgs>("RequestBringIntoView", RoutingStrategies.Bubble);
 
-        private DataTemplates? _dataTemplates;
-        private IControl? _focusAdorner;
+        private DataTemplates _dataTemplates;
+        private IControl _focusAdorner;
 
         /// <summary>
         /// Gets or sets the control's focus adorner.
         /// </summary>
-        public ITemplate<IControl>? FocusAdorner
+        public ITemplate<IControl> FocusAdorner
         {
-            get => GetValue(FocusAdornerProperty);
-            set => SetValue(FocusAdornerProperty, value);
+            get { return GetValue(FocusAdornerProperty); }
+            set { SetValue(FocusAdornerProperty, value); }
         }
 
         /// <summary>
@@ -65,27 +63,27 @@ namespace Avalonia.Controls
         /// Each control may define data templates which are applied to the control itself and its
         /// children.
         /// </remarks>
-        public DataTemplates DataTemplates => _dataTemplates ??= new DataTemplates();
+        public DataTemplates DataTemplates => _dataTemplates ?? (_dataTemplates = new DataTemplates());
 
         /// <summary>
         /// Gets or sets a context menu to the control.
         /// </summary>
-        public ContextMenu? ContextMenu
+        public ContextMenu ContextMenu
         {
-            get => GetValue(ContextMenuProperty);
-            set => SetValue(ContextMenuProperty, value);
+            get { return GetValue(ContextMenuProperty); }
+            set { SetValue(ContextMenuProperty, value); }
         }
 
         /// <summary>
         /// Gets or sets a user-defined object attached to the control.
         /// </summary>
-        public object? Tag
+        public object Tag
         {
-            get => GetValue(TagProperty);
-            set => SetValue(TagProperty, value);
+            get { return GetValue(TagProperty); }
+            set { SetValue(TagProperty, value); }
         }
 
-        public new IControl? Parent => (IControl?)base.Parent;
+        public new IControl Parent => (IControl)base.Parent;
 
         /// <inheritdoc/>
         bool IDataTemplateHost.IsDataTemplatesInitialized => _dataTemplates != null;
@@ -108,10 +106,15 @@ namespace Avalonia.Controls
                     {
                         var c = i as IControl;
 
-                        if (c?.IsInitialized == false && c is ISupportInitialize init)
+                        if (c?.IsInitialized == false)
                         {
-                            init.BeginInit();
-                            init.EndInit();
+                            var init = c as ISupportInitialize;
+
+                            if (init != null)
+                            {
+                                init.BeginInit();
+                                init.EndInit();
+                            }
                         }
                     }
                 }
@@ -128,7 +131,10 @@ namespace Avalonia.Controls
         /// Gets the element that receives the focus adorner.
         /// </summary>
         /// <returns>The control that receives the focus adorner.</returns>
-        protected virtual IControl? GetTemplateFocusTarget() => this;
+        protected virtual IControl GetTemplateFocusTarget()
+        {
+            return this;
+        }
 
         /// <inheritdoc/>
         protected sealed override void OnAttachedToVisualTreeCore(VisualTreeAttachmentEventArgs e)
@@ -167,10 +173,15 @@ namespace Avalonia.Controls
                         }
                     }
 
-                    if (_focusAdorner != null && GetTemplateFocusTarget() is Visual target)
+                    if (_focusAdorner != null)
                     {
-                        AdornerLayer.SetAdornedElement((Visual)_focusAdorner, target);
-                        adornerLayer.Children.Add(_focusAdorner);
+                        var target = (Visual)GetTemplateFocusTarget();
+
+                        if (target != null)
+                        {
+                            AdornerLayer.SetAdornedElement((Visual)_focusAdorner, target);
+                            adornerLayer.Children.Add(_focusAdorner);
+                        }
                     }
                 }
             }
