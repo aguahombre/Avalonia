@@ -329,6 +329,12 @@ internal partial class BindingExpression : UntypedBindingExpressionBase, IDescri
         if (value == BindingOperations.DoNothing)
             return true;
 
+        if (IsDataValidationEnabled && value is BindingNotification be && be.ErrorType != BindingErrorType.None && be.Error != null)
+        {
+            OnDataValidationError(be.Error);
+            return false;
+        }
+
         // Use the target type converter to convert the value to the target type if necessary.
         if (_targetTypeConverter is not null)
         {
@@ -354,6 +360,9 @@ internal partial class BindingExpression : UntypedBindingExpressionBase, IDescri
                 return false;
             }
         }
+
+        // clear the error
+        PublishValue(UnchangedValue);  
 
         // Don't set the value if it's unchanged.
         if (TypeUtilities.IdentityEquals(LeafNode.Value, value, type))

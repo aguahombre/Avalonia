@@ -7,9 +7,8 @@ namespace Avalonia.Input.GestureRecognizers
 {
     public class ScrollGestureRecognizer : GestureRecognizer
     {
-        // Pixels per second speed that is considered to be the stop of inertial scroll
-        internal const double InertialScrollSpeedEnd = 5;
         public const double InertialResistance = 0.15;
+        internal const double DefaultInertialScrollSpeedEnd = 5;
 
         private bool _canHorizontallyScroll;
         private bool _canVerticallyScroll;
@@ -24,6 +23,8 @@ namespace Avalonia.Input.GestureRecognizers
         private Point _pointerPressedPoint;
         private VelocityTracker? _velocityTracker;
         private Visual? _rootTarget;
+        private bool _allowPointerGesture;
+        private double _inertialScrollSpeedEnd = DefaultInertialScrollSpeedEnd;
 
         // Movement per second
         private Vector _inertia;
@@ -51,12 +52,27 @@ namespace Avalonia.Input.GestureRecognizers
                 o => o.IsScrollInertiaEnabled, (o,v) => o.IsScrollInertiaEnabled = v);
 
         /// <summary>
+        /// Defines the <see cref="AllowPointerGesture"/> property.
+        /// </summary>
+        public static readonly DirectProperty<ScrollGestureRecognizer, bool> AllowPointerGestureProperty =
+            AvaloniaProperty.RegisterDirect<ScrollGestureRecognizer, bool>(nameof(AllowPointerGesture),
+                o => o.AllowPointerGesture, (o,v) => o.AllowPointerGesture = v);
+
+        /// <summary>
         /// Defines the <see cref="ScrollStartDistance"/> property.
         /// </summary>
         public static readonly DirectProperty<ScrollGestureRecognizer, int> ScrollStartDistanceProperty =
             AvaloniaProperty.RegisterDirect<ScrollGestureRecognizer, int>(nameof(ScrollStartDistance),
                 o => o.ScrollStartDistance, (o, v) => o.ScrollStartDistance = v,
                 unsetValue: s_defaultScrollStartDistance);
+
+        /// <summary>
+        /// Defines the <see cref="InertialScrollSpeedEnd"/> property.
+        /// </summary>
+        public static readonly DirectProperty<ScrollGestureRecognizer, double> InertialScrollSpeedEndProperty =
+            AvaloniaProperty.RegisterDirect<ScrollGestureRecognizer, double>(nameof(InertialScrollSpeedEnd),
+                o => o.InertialScrollSpeedEnd, (o, v) => o.InertialScrollSpeedEnd = v,
+                unsetValue: DefaultInertialScrollSpeedEnd);
 
         /// <summary>
         /// Gets or sets a value indicating whether the content can be scrolled horizontally.
@@ -86,6 +102,15 @@ namespace Avalonia.Input.GestureRecognizers
         }
 
         /// <summary>
+        /// Gets or sets whether the (mouse) pointer is allowed to generate scroll gestures.
+        /// </summary>
+        public bool AllowPointerGesture
+        {
+            get => _allowPointerGesture;
+            set => SetAndRaise(AllowPointerGestureProperty, ref _allowPointerGesture, value);
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating the distance the pointer moves before scrolling is started
         /// </summary>
         public int ScrollStartDistance
@@ -94,9 +119,16 @@ namespace Avalonia.Input.GestureRecognizers
             set => SetAndRaise(ScrollStartDistanceProperty, ref _scrollStartDistance, value);
         }
 
+        // Pixels per second speed that is considered to be the stop of inertial scroll
+        public double InertialScrollSpeedEnd
+        {
+            get => _inertialScrollSpeedEnd;
+            set => SetAndRaise(InertialScrollSpeedEndProperty, ref _inertialScrollSpeedEnd, value);
+        }
+
         protected override void PointerPressed(PointerPressedEventArgs e)
         {
-            if (e.Pointer.Type == PointerType.Touch || e.Pointer.Type == PointerType.Pen)
+            if (AllowPointerGesture || e.Pointer.Type == PointerType.Touch || e.Pointer.Type == PointerType.Pen) 
             {
                 EndGesture();
                 _tracking = e.Pointer;
@@ -106,10 +138,12 @@ namespace Avalonia.Input.GestureRecognizers
                 _velocityTracker = new VelocityTracker();
                 _velocityTracker?.AddPosition(TimeSpan.FromMilliseconds(e.Timestamp), default);
             }
+            System.Diagnostics.Trace.WriteLine($"AV-ScrollPress {_gestureId} {e.Pointer.IsPrimary} {GetHashCode():X8}");
         }
 
         protected override void PointerMoved(PointerEventArgs e)
         {
+            //System.Diagnostics.Trace.WriteLine($"AV-ScrollMove {e.Pointer.Id} {e.Pointer.IsPrimary}");
             if (e.Pointer == _tracking)
             {
                 var rootPoint = e.GetPosition(_rootTarget);
@@ -146,6 +180,7 @@ namespace Avalonia.Input.GestureRecognizers
 
         protected override void PointerCaptureLost(IPointer pointer)
         {
+            System.Diagnostics.Trace.WriteLine($"AV-ScrollLost {pointer.Id} {pointer.IsPrimary}");
             if (pointer == _tracking) EndGesture();
         }
 
@@ -167,12 +202,15 @@ namespace Avalonia.Input.GestureRecognizers
 
         protected override void PointerReleased(PointerReleasedEventArgs e)
         {
+            System.Diagnostics.Trace.WriteLine($"AV-ScrollEnd {e.Pointer.Id} {e.Pointer.IsPrimary}");
             if (e.Pointer == _tracking && _scrolling)
             {
                 _inertia = _velocityTracker?.GetFlingVelocity().PixelsPerSecond ?? Vector.Zero;
 
                 e.Handled = true;
                 if (_inertia == default
+                    || double.IsNaN(_inertia.X) || double.IsNaN(_inertia.Y)
+                    || double.IsInfinity(_inertia.X) || double.IsInfinity(_inertia.Y)
                     || e.Timestamp == 0
                     || _lastMoveTimestamp == 0
                     || e.Timestamp - _lastMoveTimestamp > 200
@@ -190,6 +228,7 @@ namespace Avalonia.Input.GestureRecognizers
                         // Another gesture has started, finish the current one
                         if (_gestureId != savedGestureId)
                         {
+                            System.Diagnostics.Trace.WriteLine($"AV-Inertia {_gestureId} {savedGestureId} {GetHashCode():X8}");
                             return false;
                         }
 
@@ -199,6 +238,7 @@ namespace Avalonia.Input.GestureRecognizers
                         var speed = _inertia * Math.Pow(InertialResistance, st.Elapsed.TotalSeconds);
                         var distance = speed * elapsedSinceLastTick.TotalSeconds;
                         var scrollGestureEventArgs = new ScrollGestureEventArgs(_gestureId, distance);
+                    System.Diagnostics.Trace.WriteLine($"AV-Inertia {_gestureId} I={_inertia} S={speed} D={distance} T={st.Elapsed.TotalSeconds} P={Math.Pow(InertialResistance, st.Elapsed.TotalSeconds)}");
                         Target!.RaiseEvent(scrollGestureEventArgs);
 
                         if (!scrollGestureEventArgs.Handled || scrollGestureEventArgs.ShouldEndScrollGesture)

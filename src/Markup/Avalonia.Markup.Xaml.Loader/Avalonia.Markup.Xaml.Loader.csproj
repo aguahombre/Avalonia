@@ -6,6 +6,12 @@
     <IsAotCompatible>false</IsAotCompatible>
     <DefineConstants>$(DefineConstants);XAMLX_INTERNAL;XAML_RUNTIME_LOADER</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="xamlil.github\**" />
+    <EmbeddedResource Remove="xamlil.github\**" />
+    <None Remove="xamlil.github\**" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Avalonia.Markup.Xaml\Avalonia.Markup.Xaml.csproj" />
   </ItemGroup>

@@ -663,7 +663,7 @@ namespace Avalonia.Controls.Presenters
 
             double GetDistance(double speed)
             {
-                var time = Math.Log(ScrollGestureRecognizer.InertialScrollSpeedEnd / Math.Abs(speed)) / Math.Log(ScrollGestureRecognizer.InertialResistance);
+                var time = Math.Log(ScrollGestureRecognizer.DefaultInertialScrollSpeedEnd / Math.Abs(speed)) / Math.Log(ScrollGestureRecognizer.InertialResistance);
 
                 double timeElapsed = 0, distance = 0, step = 0;
 
